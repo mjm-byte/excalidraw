@@ -6,6 +6,7 @@
   --zIndex-interactiveCanvas: 2;
   --zIndex-svgLayer: 3;
   --zIndex-wysiwyg: 3;
+  --zIndex-textAutocomplete: 4;
   --zIndex-canvasButtons: 3;
   --zIndex-layerUI: 4;
   --zIndex-viewportStatusFrame: 5;
@@ -145,6 +146,64 @@ body.excalidraw-cursor-resize * {
 
     > textarea {
       pointer-events: auto;
+    }
+  }
+
+  // word suggestions at the caret of the text editor (see textAutocomplete)
+  .TextAutocomplete {
+    position: absolute;
+    z-index: var(--zIndex-textAutocomplete);
+    min-width: 11rem;
+    max-width: 18rem;
+    padding: 0.25rem;
+    box-sizing: border-box;
+    pointer-events: auto;
+    user-select: none;
+    font-family: var(--ui-font);
+    font-size: 0.875rem;
+    color: var(--popup-text-color);
+    background: var(--island-bg-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-island);
+
+    &__item {
+      padding: 0.375rem 0.625rem;
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &:hover {
+        background: var(--button-hover-bg);
+      }
+
+      &.is-selected {
+        background: var(--color-surface-primary-container);
+      }
+    }
+
+    &__typed {
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    &__hints {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+      padding: 0.375rem 0.625rem 0.125rem;
+      border-top: 1px solid var(--default-border-color);
+      font-size: 0.6875rem;
+      color: var(--color-on-surface);
+
+      kbd {
+        margin-inline-end: 0.25rem;
+        padding: 0 0.3125rem;
+        font-family: inherit;
+        border-radius: 0.25rem;
+        background: var(--color-surface-high);
+      }
     }
   }
 
