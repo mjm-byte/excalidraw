@@ -73,6 +73,12 @@ import {
   actionZoomOut,
 } from "../actions/actionCanvas";
 
+import {
+  createTextAutocomplete,
+  getSceneWords,
+  type TextAutocomplete,
+} from "./textAutocomplete";
+
 import type { ParsedDataTranferList } from "../clipboard";
 
 import type App from "../components/App";
@@ -333,6 +339,7 @@ export const textWysiwyg = ({
   };
 
   let LAST_THEME = app.state.theme;
+  let autocomplete: TextAutocomplete | null = null;
 
   const updateWysiwygStyle = () => {
     LAST_THEME = app.state.theme;
@@ -516,6 +523,7 @@ export const textWysiwyg = ({
         y: coordY,
       };
       editable.scrollTop = 0;
+      autocomplete?.reposition();
       // For some reason updating font attribute doesn't set font family
       // hence updating font family explicitly for test environment
       if (isTestEnv()) {
@@ -844,6 +852,7 @@ export const textWysiwyg = ({
         editable.selectionEnd = selectionStart;
       }
       onChange(editable.value);
+      autocomplete?.update(true);
       // once the update, and any scroll it made (see
       // AppText.handleTextWysiwyg), is in the app's state
       queueMicrotask(followCaretFromUnderPanels);
@@ -851,6 +860,13 @@ export const textWysiwyg = ({
   }
 
   editable.onkeydown = (event) => {
+    if (autocomplete?.handleKeyDown(event)) {
+      // taken by the suggestions (Escape must not leave the editor, Tab not
+      // indent)
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if (!event.shiftKey && actionZoomIn.keyTest(event)) {
       event.preventDefault();
       app.actionManager.executeAction(actionZoomIn);
@@ -1067,6 +1083,7 @@ export const textWysiwyg = ({
   };
 
   const cleanup = () => {
+    autocomplete?.destroy();
     // remove events to ensure they don't late-fire
     editable.onblur = null;
     editable.oninput = null;
@@ -1294,6 +1311,18 @@ export const textWysiwyg = ({
   }
 
   editable.onpointerdown = (event) => event.stopPropagation();
+
+  if (onChange && editorBox) {
+    // words of the other texts in the scene, as of the first suggestion
+    autocomplete = createTextAutocomplete({
+      editable,
+      container: editorBox,
+      getWords: () =>
+        getSceneWords(app.scene.getNonDeletedElements(), element.id),
+      getCaretBounds: getCaretViewportBounds,
+      getContainerLeft: () => updateEditorBoxInsets(),
+    });
+  }
 
   // rAF (+ capture to by doubly sure) so we don't catch te pointerdown that
   // triggered the wysiwyg

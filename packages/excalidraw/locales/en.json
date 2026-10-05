@@ -748,6 +748,11 @@
       "isSpeaking": "User is speaking"
     }
   },
+  "textAutocomplete": {
+    "label": "Word suggestions",
+    "insert": "Insert",
+    "close": "Close"
+  },
   "commandPalette": {
     "title": "Command palette",
     "shortcuts": {
